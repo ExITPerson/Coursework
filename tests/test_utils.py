@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from tests.conftest import save_xlsx
-from src.views import get_data_from_xlsx
+from src.utils import get_data_from_xlsx
 
 
 def test_get_data_from_xlsx(save_xlsx):
