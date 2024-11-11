@@ -5,6 +5,7 @@ from functools import wraps
 
 
 def log():
+    """ Декоратор, записывающий выходные данные функции в json файл """
     def wrapper(func):
         @wraps(func)
         def inner(*args, **kwargs):

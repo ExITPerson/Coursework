@@ -6,6 +6,7 @@ from src.utils import get_data_from_xlsx
 
 
 def test_get_data_from_xlsx(save_xlsx):
+    """ Тест чтения файла xlsx """
     data = pd.DataFrame(
         [
             {"data": "24.03.2024", "name": "Alice", "amount": 63516},

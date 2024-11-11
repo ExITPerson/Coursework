@@ -22,6 +22,7 @@ def clear_logs():
 
 
 def test_log_file_creation_and_content(freezer):
+    """ Тестирование создания файла с корректными данными list[dict] """
     freezer.move_to("11.11.2024")
     clear_logs()
 
@@ -35,5 +36,6 @@ def test_log_file_creation_and_content(freezer):
 
 # Тест логирования исключений
 def test_log_error():
+    """ Тестирование ошибки при передаче формата данных не list[dict] """
     with pytest.raises(ValueError, match="Ошибка записи, неверный формат данных"):
         return_unserializable()
