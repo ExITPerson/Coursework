@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.reports import spending_by_category, spending_by_weekday
+from src.reports import spending_by_category, spending_by_weekday, spending_by_workday
 from tests.conftest import save_xlsx
 
 
@@ -100,18 +100,19 @@ def test_spending_by_weekday_date_now(freezer, save_xlsx):
     freezer.move_to("11.11.2024")
     file = save_xlsx(data)
     result = spending_by_weekday(file)
-    assert result == [
-        {'Воскресенье': 236.68,
-          'Вторник': 236.68,
-          'Понедельник': 236.68,
-          'Пятница': 157.63,
-          'Среда': 236.68,
-          'Суббота': -0.0,
-          'Четверг': 261.81}
-    ]
+    assert result == [{
+        'Friday': 157.63,
+        'Monday': 236.68,
+        'Saturday': 0,
+        'Sunday': 236.68,
+        'Thursday': 261.81,
+        'Tuesday': 236.68,
+        'Wednesday': 236.68
+    }]
 
 
-def test_spending_by_weekday_user_date(freezer, save_xlsx):
+def test_spending_by_weekday_user_date(save_xlsx):
+    """ Тестирование функции при введенной дате """
     data = pd.DataFrame(
         [
             {"Дата операции": "09.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
@@ -124,18 +125,19 @@ def test_spending_by_weekday_user_date(freezer, save_xlsx):
     )
     file = save_xlsx(data)
     result = spending_by_weekday(file, "09.09.2024")
-    assert result == [
-        {'Воскресенье': 286.93,
-          'Вторник': -0.0,
-          'Понедельник': 236.68,
-          'Пятница': -0.0,
-          'Среда': -0.0,
-          'Суббота': -0.0,
-          'Четверг': -0.0}
-    ]
+    assert result == [{
+        'Friday': 0,
+        'Monday': 236.68,
+        'Saturday': 0,
+        'Sunday': 286.93,
+        'Thursday': 0,
+        'Tuesday': 0,
+        'Wednesday': 0
+    }]
 
 
-def test_spending_by_weekday_no_operation_these_dates(freezer, save_xlsx):
+def test_spending_by_weekday_no_operation_these_dates(save_xlsx):
+    """ Тестирование функции, если операций нет """
     data = pd.DataFrame(
         [
             {"Дата операции": "09.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
@@ -148,15 +150,15 @@ def test_spending_by_weekday_no_operation_these_dates(freezer, save_xlsx):
     )
     file = save_xlsx(data)
     result = spending_by_weekday(file, "30.05.2024")
-    assert result == [
-        {'Воскресенье': -0.0,
-          'Вторник': -0.0,
-          'Понедельник': -0.0,
-          'Пятница': -0.0,
-          'Среда': -0.0,
-          'Суббота': -0.0,
-          'Четверг': -0.0}
-    ]
+    assert result == [{
+        'Friday': 0,
+        'Monday': 0,
+        'Saturday': 0,
+        'Sunday': 0,
+        'Thursday': 0,
+        'Tuesday': 0,
+        'Wednesday': 0
+    }]
 
 
 
@@ -173,3 +175,78 @@ def test_spending_by_weekday_incorrect_content(save_xlsx):
     file = save_xlsx(data)
     with pytest.raises(ValueError, match="Не верный формат данных"):
         spending_by_weekday(file, "08.09.2024")
+
+
+def test_spending_by_workday_date_now(freezer, save_xlsx):
+    """ Тестирование работы функции, если дата не была задана """
+    data = pd.DataFrame(
+        [
+            {"Дата операции": "10.11.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "09.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "08.11.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+            {"Дата операции": "07.11.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "06.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "05.11.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "04.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "03.11.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "01.11.2024 11:11:11", "Сумма операции": -28.34, "Статус": "OK"},
+            {"Дата операции": "31.10.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+            {"Дата операции": "30.10.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "29.10.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "28.10.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "27.10.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+        ]
+    )
+    freezer.move_to("11.11.2024")
+    file = save_xlsx(data)
+    result = spending_by_workday(file)
+    assert result == [{'Days_off': 118.34, 'Weekday': 225.9}]
+
+
+def test_spending_by_workday_user_date(save_xlsx):
+    """ Тестирование функции с введенной датой """
+    data = pd.DataFrame(
+        [
+            {"Дата операции": "09.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "08.09.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+            {"Дата операции": "06.09.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "05.08.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "04.08.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "31.05.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+        ]
+    )
+    file = save_xlsx(data)
+    result = spending_by_workday(file, "09.09.2024")
+    assert result == [{'Days_off': 143.47, 'Weekday': 47.34}]
+
+
+def test_spending_by_workday_no_operation_these_dates(save_xlsx):
+    """ Тестирование функции если операций нет """
+    data = pd.DataFrame(
+        [
+            {"Дата операции": "09.11.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "08.09.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+            {"Дата операции": "06.09.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "05.08.2024 23:23:23", "Сумма операции": -236.68, "Статус": "OK"},
+            {"Дата операции": "04.08.2024 11:11:11", "Сумма операции": 15000, "Статус": "OK"},
+            {"Дата операции": "31.05.2024 09:11:11", "Сумма операции": -286.93, "Статус": "OK"},
+        ]
+    )
+    file = save_xlsx(data)
+    result = spending_by_workday(file, "30.05.2024")
+    assert result == [{'Days_off': 0, 'Weekday': 0}]
+
+
+def test_spending_by_workday_no_file():
+    """ Тестирование ошибки, если файл не найден """
+    with pytest.raises(FileNotFoundError, match="Файл не найден"):
+        spending_by_workday("operations.xlsx", "08.09.2024")
+
+
+
+def test_spending_by_workday_incorrect_content(save_xlsx):
+    """ Тестирование ошибки, при передаче файла с некорректным форматом содержимого """
+    data = pd.DataFrame([{"Имя": "Иван"},{"Имя": "Алиса"}])
+    file = save_xlsx(data)
+    with pytest.raises(ValueError, match="Не верный формат данных"):
+        spending_by_workday(file, "08.09.2024")
