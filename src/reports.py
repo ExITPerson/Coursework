@@ -38,7 +38,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         return filtered_transactions
     except Exception:
         raise ValueError("Не верный формат данных")
-
+#print(spending_by_category("data/operations_t.xlsx", "Фастфуд")[:3])
 
 def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """
@@ -67,9 +67,12 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
             if (date_to >= transaction_date >= date_from
                     and transaction["Статус"] == "OK"
                     and transaction["Сумма операции"] < 0):
-
                 weekday = datetime.weekday(transaction_date)
                 weekday_list[int(weekday)].append(transaction["Сумма операции"])
+
+        for day in weekday_list:
+            if len(day) == 0:
+                day.append(0)
 
         weekday_avg_expenses = [
             {
@@ -87,4 +90,4 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
         raise ValueError("Не верный формат данных")
 
 
-print(spending_by_weekday("data/operations_t.xlsx"))
+#print(spending_by_weekday("data/operations_t.xlsx"))
