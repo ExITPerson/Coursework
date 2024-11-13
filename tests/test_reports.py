@@ -10,7 +10,7 @@ data_1 = pd.DataFrame([
     {"Дата операции": "15.08.2024 15:15:15", "Категория": "Фастфуд"}
 ])
 
-def test_spending_by_category(freezer):
+def test_spending_by_category(freezer) -> None:
     """ Тестирование функции с разными аргументами """
     """ Тестирование функции с существующей категорией и датой """
     freezer.move_to("11.11.2024")
@@ -27,13 +27,18 @@ def test_spending_by_category(freezer):
     assert result.empty
 
     """ Тестирование обработки некорректного формата даты"""
-    with pytest.raises(ValueError, match="Не правильный формат даты"):
+    with pytest.raises(ValueError, match="Не верный формат даты"):
         spending_by_category(data_1, "Фастфуд", "2024-11-10")
 
-    """ функции с пустым DataFrame """
+    """ Тестирование функции с пустым DataFrame """
     empty_df = pd.DataFrame(columns=["Дата операции", "Категория"])
     result = spending_by_category(empty_df, "Фастфуд")
     assert result.empty
+
+    """Тестирование функции с не верным форматом переданного df"""
+    data_1_error = pd.DataFrame([{"Name": "Alice", "Age": 23}])
+    with pytest.raises(ValueError, match="Не верный формат данных"):
+        spending_by_workday(data_1_error, "11.11.2024")
 
 
 data_2 = pd.DataFrame([
@@ -45,7 +50,7 @@ data_2 = pd.DataFrame([
 ])
 
 
-def test_spending_by_weekday(freezer):
+def test_spending_by_weekday(freezer) -> None:
     """ Тестирование работы функции """
     freezer.move_to("11.11.2024")
     """Тестирование функции с указанной датой"""
@@ -68,8 +73,13 @@ def test_spending_by_weekday(freezer):
     assert (result.iloc[0] == 0).all()
 
     """ Тестирование обработки некорректного формата даты"""
-    with pytest.raises(ValueError, match="Не правильный формат даты"):
+    with pytest.raises(ValueError, match="Не верный формат даты"):
         spending_by_weekday(data_1, "2024-11-10")
+
+    """Тестирование функции с не верным форматом переданного df"""
+    data_2_error = pd.DataFrame([{"Name": "Alice", "Age": 23}])
+    with pytest.raises(ValueError, match="Не верный формат данных"):
+        spending_by_workday(data_2_error, "11.11.2024")
 
 
 data_3 = pd.DataFrame([
@@ -82,7 +92,7 @@ data_3 = pd.DataFrame([
     {"Дата операции": "05.11.2024 10:10:10", "Статус": "OK", "Сумма операции": -250.0}
 ])
 
-def test_spending_by_workday(freezer):
+def test_spending_by_workday(freezer) -> None:
     """ Тестирование работы функции, если дата не была задана """
     freezer.move_to("11.11.2024")
 
@@ -102,5 +112,10 @@ def test_spending_by_workday(freezer):
     assert result.loc[0, "Days_off"] == 0
 
     """ Тестирование обработки некорректного формата даты"""
-    with pytest.raises(ValueError, match="Не правильный формат даты"):
-        spending_by_weekday(data_1, "2024-11-10")
+    with pytest.raises(ValueError, match="Не верный формат даты"):
+        spending_by_workday(data_3, "2024-11-10")
+
+    """Тестирование функции с не верным форматом переданного df"""
+    data_3_error = pd.DataFrame([{"Name": "Alice", "Age": 23}])
+    with pytest.raises(ValueError, match="Не верный формат данных"):
+        spending_by_workday(data_3_error, "11.11.2024")

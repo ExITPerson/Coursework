@@ -11,7 +11,8 @@ def log():
         def inner(*args, **kwargs):
             date = datetime.now().strftime("%Y_%m_%d")
 
-            result = func(*args, **kwargs)
+            df = func(*args, **kwargs)
+            result = df.to_dict("records")
             try:
                 with open(f"json/{date}_{func.__name__}.json", "w", encoding="utf-8") as f:
                     json.dump(result, f, indent=4, ensure_ascii=False)

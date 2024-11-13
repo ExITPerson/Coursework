@@ -6,4 +6,8 @@ def get_data_from_xlsx(file_path):
     df = pd.read_excel(file_path)
     return df
 
-print(get_data_from_xlsx("data/operations_t.xlsx"))
+
+def get_data_from_csv(file_path):
+    """ Функция для чтения данных xlsx файла """
+    df = pd.read_csv(file_path)
+    return df
