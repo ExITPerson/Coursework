@@ -1,20 +1,16 @@
-from os import getcwd
+import json
+from collections import defaultdict
+from typing import Any
 
 import pandas as pd
-import json
-
-from collections import defaultdict
-
 from black import datetime
 
-from utils import get_data_from_xlsx
 
-
-def profitable_cashback_categories(data: pd.DataFrame, year: str, month: str):
+def profitable_cashback_categories(data: pd.DataFrame, year: str, month: str) -> Any:
     date = datetime.strptime(f"{month}.{year}", "%m.%Y").strftime("%m.%Y")
     try:
-        bool = pd.notnull(data["Кэшбэк"])
-        data = data[bool].to_dict("records")
+        df = pd.notnull(data["Кэшбэк"])
+        data: dict = data[df].to_dict("records")
 
         cashback_categories = [
             {d["Категория"]: d["Кэшбэк"]}

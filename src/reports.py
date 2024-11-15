@@ -1,13 +1,9 @@
 import logging
-
+from datetime import datetime, timedelta
+from statistics import mean
 from typing import Optional
 
 import pandas as pd
-
-from datetime import datetime, timedelta
-
-from statistics import mean
-
 
 logger = logging.getLogger("currency")
 logger.setLevel(logging.DEBUG)
@@ -27,22 +23,26 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     try:
         if date is None:
             logger.info("Дата не задана, получение даты в настоящем времени")
-            date = datetime.now()
+            date: datetime = datetime.now()
         else:
             logger.info(f"Преобразование даты {date} в нужный формат")
-            date = datetime.strptime(date, "%d.%m.%Y")
+            date: datetime = datetime.strptime(date, "%d.%m.%Y")
     except Exception as ex:
         logger.error(f"Ошибка: {ex}")
         raise ValueError("Не верный формат даты")
     date_to = date
-    date_from = (date_to - timedelta(days=90))
+    date_from = date_to - timedelta(days=90)
     logger.info(f"Получение даты 3 месяца назад {date_from}")
 
     try:
         logger.info("Получение списка транзакций")
-        filtered_transactions = [transaction for transaction in transactions_dict if date_to >= datetime.strptime(
-                transaction["Дата операции"], "%d.%m.%Y %H:%M:%S") >= date_from
-                                 and transaction["Категория"] == category]
+
+        filtered_transactions: list = []
+        for transaction in transactions_dict:
+            transaction_date: datetime = datetime.strptime(transaction["Дата операции"], "%d.%m.%Y %H:%M:%S")
+            if date_to >= transaction_date >= date_from and transaction["Категория"] == category:
+                filtered_transactions.append(transaction)
+
     except Exception as ex:
         logger.info(f"Ошибка при получении списка транзакций: {ex}")
         raise ValueError("Не верный формат данных")
@@ -50,7 +50,6 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     logger.info("Преобразование списка в df")
     df = pd.DataFrame(filtered_transactions)
     return df
-
 
 
 def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
@@ -63,27 +62,29 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
     try:
         if date is None:
             logger.info("Дата не задана, получение даты в настоящем времени")
-            date = datetime.now()
+            date: datetime = datetime.now()
         else:
             logger.info(f"Преобразование даты {date} в нужный формат")
-            date = datetime.strptime(date, "%d.%m.%Y")
+            date: datetime = datetime.strptime(date, "%d.%m.%Y")
     except Exception as ex:
         logger.error(f"Ошибка: {ex}")
         raise ValueError("Не верный формат даты")
     date_to = date
-    date_from = (date_to - timedelta(days=90))
+    date_from = date_to - timedelta(days=90)
     logger.info(f"Получение даты 3 месяца назад {date_from}")
 
     try:
-        day_list = [
+        day_list: list = [
             {"Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []}
         ]
         logger.info("Получение списка сумм операций по фильтру")
         for transaction in transactions_dict:
             transaction_date = datetime.strptime(transaction["Дата операции"], "%d.%m.%Y %H:%M:%S")
-            if (date_to >= transaction_date >= date_from
-                    and transaction["Статус"] == "OK"
-                    and transaction["Сумма операции"] < 0):
+            if (
+                date_to >= transaction_date >= date_from
+                and transaction["Статус"] == "OK"
+                and transaction["Сумма операции"] < 0
+            ):
                 weekday = datetime.strftime(transaction_date, "%A")
                 day_list[0][weekday].append(transaction["Сумма операции"])
     except Exception as ex:
@@ -91,10 +92,9 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
         raise ValueError("Не верный формат данных")
 
     logger.info("Преобразование списка в df")
-    avg_daily_expenses = [{k: round(-mean(v),2) if len(v) != 0 else 0 for k, v in day_list[0].items()}]
+    avg_daily_expenses = [{k: round(-mean(v), 2) if len(v) != 0 else 0 for k, v in day_list[0].items()}]
     df = pd.DataFrame(avg_daily_expenses)
     return df
-
 
 
 def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
@@ -102,7 +102,7 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
     Функция формирующая отчет по средней сумме операций по дням недели
     за 3 месяца от заданной даты
     """
-    weekdays_expenses = [{"Weekday": [], "Days_off": []}]
+    weekdays_expenses: list = [{"Weekday": [], "Days_off": []}]
     weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
     days_off = ["Saturday", "Sunday"]
     logger.info("Преобразование df в объект Python")
@@ -120,6 +120,6 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
         raise ValueError("Не верный формат данных")
 
     logger.info("Преобразование списка в df")
-    avg_weekdays_expenses = [{k: round(mean(v),2) if len(v) != 0 else 0 for k, v in weekdays_expenses[0].items()}]
+    avg_weekdays_expenses = [{k: round(mean(v), 2) if len(v) != 0 else 0 for k, v in weekdays_expenses[0].items()}]
     df = pd.DataFrame(avg_weekdays_expenses)
     return df

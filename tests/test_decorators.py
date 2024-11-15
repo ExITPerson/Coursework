@@ -1,28 +1,30 @@
-import os
 import json
+import os
+from typing import Any
+
 import pytest
 
 from src.decorator import log
 
 
 @log()
-def sample_function():
+def sample_function() -> list:
     return [{"name": "Alice"}]
 
 
 @log()
-def return_unserializable():
+def return_unserializable() -> dict:
     return {"data": {1, 2, 3}}
 
 
-def clear_logs():
+def clear_logs() -> Any:
     if os.path.exists("json"):
         for filename in os.listdir("json"):
             os.remove(os.path.join("json", filename))
 
 
-def test_log_file_creation_and_content(freezer):
-    """ Тестирование создания файла с корректными данными list[dict] """
+def test_log_file_creation_and_content(freezer: Any) -> None:
+    """Тестирование создания файла с корректными данными list[dict]"""
     freezer.move_to("11.11.2024")
     clear_logs()
 
@@ -35,7 +37,7 @@ def test_log_file_creation_and_content(freezer):
 
 
 # Тест логирования исключений
-def test_log_error():
-    """ Тестирование ошибки при передаче формата данных не list[dict] """
+def test_log_error() -> None:
+    """Тестирование ошибки при передаче формата данных не list[dict]"""
     with pytest.raises(ValueError, match="Ошибка записи, неверный формат данных"):
         return_unserializable()
