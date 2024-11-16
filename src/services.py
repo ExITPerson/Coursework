@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Any
 
 import pandas as pd
-from black import datetime
+from datetime import datetime
 
 
 def profitable_cashback_categories(data: pd.DataFrame, year: str, month: str) -> Any:

@@ -1,17 +1,12 @@
 import os
 from collections import defaultdict
 from datetime import datetime
-
 import json
-from http.client import responses
-
 import pandas as pd
-
 import requests
-
-from utils import get_data_from_xlsx
-
+from src.utils import get_data_from_xlsx, date_formater, open_json
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -21,77 +16,73 @@ API_KEY_STOCK = os.getenv("API_KEY_STOCK")
 
 
 def greeting():
-    time = datetime.now().strftime("%H:%M")
-    if "4:00" <= time < "12:00":
+    time = datetime.now().hour
+
+    if 4 <= time < 12:
         return "Доброе утро"
-    elif "12:00" <= time < "16:00":
+    elif 12 <= time < 16:
         return "Добрый день"
-    elif "16:00" <= time < "00:00":
+    elif 16 <= time <= 23:
         return "Добрый вечер"
     else:
         return "Доброй ночи"
 
 
-def info_on_the_card(data: pd.DataFrame, date=None):
-    if date is None:
-        date = datetime.now()
-    else:
-        date = datetime.strptime(date, "%Y.%m.%d")
+
+def info_on_the_card(data: pd.DataFrame, date):
     date_to = date.replace(day=1)
+    try:
+        operations = data[pd.notnull(data["Номер карты"])].to_dict("records")
+    except Exception as ex:
+        return []
 
-    df = pd.notnull(data["Номер карты"])
-    operations = data[df].to_dict("records")
-
-    card_operations = [{operation["Номер карты"]: operation["Сумма операции"]}
-                       for operation in operations
-        if date_to <= datetime.strptime(operation["Дата операции"], "%d.%m.%Y %H:%M:%S") <= date
-                       and operation["Сумма операции"] < 0]
+    try:
+        card_operations = [{operation["Номер карты"]: operation["Сумма операции"]}
+                           for operation in operations
+            if date_to <= datetime.strptime(operation["Дата операции"], "%d.%m.%Y %H:%M:%S").date() <= date
+                           and operation["Сумма операции"] < 0]
+    except TypeError as te:
+        raise TypeError("Не правильный формат даты")
 
     dd = defaultdict(list)
     for card in card_operations:
         for k, v in card.items():
             dd[k].append(v)
-    result = [{"last_digits": k[1:], "total_spent": -sum(v), "cashback": round((-sum(v) / 100),2)} for k, v in dd.items()]
+
+    result = [{
+        "last_digits": k[1:],
+        "total_spent": round(-sum(v), 2),
+        "cashback": round((-sum(v) / 100),2)}
+        for k, v in dd.items()]
     return result
 
 
-print(info_on_the_card(get_data_from_xlsx("data/operations_t.xlsx")))
-
-
-def get_top_five_transactions(data, date=None):
-    if date is None:
-        date = datetime.now()
-    else:
-        date = datetime.strptime(date, "%Y.%m.%d")
+def get_top_five_transactions(data, date):
     date_to = date.replace(day=1)
-
     operations = data.to_dict("records")
 
-    sort_transactions = [operation for operation in operations
-                         if date_to <= datetime.strptime(operation["Дата операции"], "%d.%m.%Y %H:%M:%S") <= date
-                             and operation["Сумма операции"] < 0]
+    try:
+        sort_list = sorted([operation for operation in operations
+                            if date_to <=
+                            datetime.strptime(operation["Дата операции"], "%d.%m.%Y %H:%M:%S").date() <= date
+                            and operation["Сумма операции"] < 0],
+                           key=lambda x: x["Сумма операции"], reverse=False)
+    except TypeError as te:
+        raise TypeError("Не корректные данные")
 
-    sort_list = sorted(sort_transactions, key=lambda x: x["Сумма операции"], reverse=False)
     top_transactions = [{
                     "date":
                         datetime.strptime(i["Дата операции"], "%d.%m.%Y %H:%M:%S").strftime("%d.%m.%Y"),
                     "amount": -i["Сумма операции"],
                     "category": i["Категория"],
-                    "discription": i["Описание"]
+                    "description": i["Описание"]
                 } for i in sort_list[0:5]]
 
     return top_transactions
 
 
-print(get_top_five_transactions(get_data_from_xlsx("data/operations_t.xlsx")))
-
-
-def exchange_rate(setting = "json/user_settings.json"):
-    with open(setting, "r", encoding="utf-8") as f:
-        try:
-            currency_user = json.load(f)
-        except Exception as ex:
-            raise ValueError("Не верный формат файла")
+def exchange_rate():
+    currency_user = open_json("user_settings.json")
 
     exchange = []
     for currency in currency_user["user_currencies"]:
@@ -100,9 +91,9 @@ def exchange_rate(setting = "json/user_settings.json"):
         payload = {
             "amount": 1,
             "from": currency,
-            "to": "RUB",
-        }
+            "to": "RUB",}
         response = requests.get(url, headers=headers, params=payload)
+
         if response.status_code == 200:
             exchange.append({
                 "currency": currency,
@@ -112,27 +103,48 @@ def exchange_rate(setting = "json/user_settings.json"):
             raise BaseException(response.status_code)
     return exchange
 
-print(exchange_rate())
+
+def stock_quotes():
+    stocks = open_json("user_settings.json")
+
+    quotes = []
+    for stock in stocks["user_stocks"]:
+        url = f"http://api.marketstack.com/v1/tickers/{stock}/intraday/latest"
+        params = {"access_key": API_KEY_STOCK}
+        response = requests.get(url, params=params)
+
+        if response.status_code == 200:
+            quotes.append({"stock": stock, "price": round(response.json()["last"], 2)})
+        else:
+            raise BaseException(response.status_code)
+
+    return quotes
 
 
-def stock_quotes(setting = "json/user_settings.json"):
-    with open(setting, "r", encoding="utf-8") as f:
-        try:
-            stocks = json.load(f)
-        except Exception as ex:
-            raise ValueError("Не верный формат файла")
+# data = get_data_from_xlsx("data/operations_t.xlsx")
 
-        quotes = []
-        for stock in stocks["user_stocks"]:
-            url = f"http://api.marketstack.com/v1/tickers/{stock}/intraday/latest"
-            params = {"access_key": API_KEY_STOCK}
-            response = requests.get(url, params=params)
 
-            if response.status_code == 200:
-                quotes.append({"stock": stock, "price": response.json()["last"]})
-            else:
-                raise BaseException(response.status_code)
+def get_the_end_result(date_user):
+    date = date_formater(date_user).date()
+    greet = greeting()
+    cards = info_on_the_card(data, date)
+    top_transactions = get_top_five_transactions(data, date)
+    rate = exchange_rate()
+    stocks = stock_quotes()
 
-        return quotes
+    result = {
+        "greeting": greet,
+        "cards": cards,
+        "top_transactions": top_transactions,
+        "currency_rates": rate,
+        "stock_prices": stocks,
+    }
 
-print(stock_quotes())
+    return json.dumps(result, ensure_ascii=False, indent=4)
+
+# date = "2024-11-11 00:00:00"
+#
+# if __name__ == "__main__":
+#     print(get_the_end_result(date))
+
+
