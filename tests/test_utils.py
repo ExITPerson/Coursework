@@ -1,11 +1,10 @@
+from datetime import datetime
 from pathlib import Path
+
 import pandas as pd
 import pytest
-import json
-from unittest.mock import patch, mock_open
 
-from src.utils import get_data_from_xlsx, date_formater, open_json
-from datetime import datetime
+from src.utils import date_formater, get_data_from_xlsx, open_json
 
 
 def test_get_data_from_xlsx(save_xlsx: Path) -> None:
@@ -26,14 +25,15 @@ def test_get_data_from_xlsx(save_xlsx: Path) -> None:
         {"data": "11.12.2024", "name": "Ivan", "amount": 516},
     ]
 
+
 def test_date_formater():
-    """ Тест с корректным форматом даты """
+    """Тест с корректным форматом даты"""
     result = date_formater("2024-11-11 01:01:01")
     assert result == datetime(2024, 11, 11, 0, 0)
 
 
 def test_date_formater_error():
-    """ Тест с не корректным форматом даты """
+    """Тест с не корректным форматом даты"""
     with pytest.raises(TypeError, match="Не корректная дата"):
         date_formater("2024.11.11 01:01:01")
 
@@ -43,6 +43,7 @@ def test_open_json(save_json):
     file = save_json(data)
     result = open_json(file)
     assert result == data
+
 
 def test_open_json_error(save_xlsx):
     data = pd.DataFrame([{"name": "Alice", "Age": 30}, {"name": "Bob", "Age": 32}])

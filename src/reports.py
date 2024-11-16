@@ -5,7 +5,7 @@ from typing import Optional
 
 import pandas as pd
 
-logger = logging.getLogger("currency")
+logger = logging.getLogger("spending")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler("logs/reports.log", "w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s_%(funcName)s:%(lineno)s - %(levelname)s: %(message)s")

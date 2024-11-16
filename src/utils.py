@@ -1,6 +1,8 @@
 import json
-import pandas as pd
 from datetime import datetime
+from typing import Any
+
+import pandas as pd
 
 
 def get_data_from_xlsx(file_path: str) -> pd.DataFrame:
@@ -9,7 +11,7 @@ def get_data_from_xlsx(file_path: str) -> pd.DataFrame:
     return df
 
 
-def date_formater(date: str):
+def date_formater(date: str) -> datetime:
     try:
         date_format = datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y.%m.%d")
         date = datetime.strptime(date_format, "%Y.%m.%d")
@@ -18,7 +20,7 @@ def date_formater(date: str):
         raise TypeError("Не корректная дата")
 
 
-def open_json(file_path):
+def open_json(file_path: Any) -> Any:
     with open(file_path, "r", encoding="utf-8") as f:
         try:
             result = json.load(f)

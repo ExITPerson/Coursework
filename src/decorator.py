@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 def log() -> Callable:
     """Декоратор, записывающий выходные данные функции в json файл"""
+
     def wrapper(func: Callable) -> Callable:
         @wraps(func)
         def inner(*args: Any, **kwargs: Any) -> Any:
