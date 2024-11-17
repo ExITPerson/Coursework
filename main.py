@@ -31,14 +31,14 @@ def main():
                                "3. По выходным и будним дням\n")
         if input_spending == "1":
             category = input("Введите категорию:")
-            df = pd.DataFrame(spending_by_category(data, category))
-            print(df.to_dict("records"))
+            result = spending_by_category(data, category)
+            print(json.dumps(result, indent=4, ensure_ascii=False))
         elif input_spending =="2":
-            df = pd.DataFrame(spending_by_weekday(data))
-            print(df.to_dict("records"))
+            result = spending_by_weekday(data)
+            print(json.dumps(result, indent=4, ensure_ascii=False))
         elif input_spending == "3":
-            df = pd.DataFrame(spending_by_workday(data))
-            print(df.to_dict("records"))
+            result = spending_by_workday(data)
+            print(json.dumps(result, indent=4, ensure_ascii=False))
 
 
 
