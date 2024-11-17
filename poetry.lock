@@ -310,6 +310,20 @@ pycodestyle = ">=2.12.0,<2.13.0"
 pyflakes = ">=3.2.0,<3.3.0"
 
 [[package]]
+name = "freezegun"
+version = "1.5.1"
+description = "Let your Python tests travel through time"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "freezegun-1.5.1-py3-none-any.whl", hash = "sha256:bf111d7138a8abe55ab48a71755673dbaa4ab87f4cff5634a4442dfec34c15f1"},
+    {file = "freezegun-1.5.1.tar.gz", hash = "sha256:b29dedfcda6d5e8e083ce71b2b542753ad48cfec44037b3fc79702e2980a89e9"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.7"
+
+[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -696,6 +710,21 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "pytest-freezer"
+version = "0.4.8"
+description = "Pytest plugin providing a fixture interface for spulec/freezegun"
+optional = false
+python-versions = ">= 3.6"
+files = [
+    {file = "pytest_freezer-0.4.8-py3-none-any.whl", hash = "sha256:644ce7ddb8ba52b92a1df0a80a699bad2b93514c55cf92e9f2517b68ebe74814"},
+    {file = "pytest_freezer-0.4.8.tar.gz", hash = "sha256:8ee2f724b3ff3540523fa355958a22e6f4c1c819928b78a7a183ae4248ce6ee6"},
+]
+
+[package.dependencies]
+freezegun = ">=1.0"
+pytest = ">=3.6"
+
+[[package]]
 name = "pytest-xdist"
 version = "3.6.1"
 description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
@@ -828,4 +857,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "f341a3ffcf312711cf4cf62906d7a708fd6b580e58d6fb4e28de925802fda6ec"
+content-hash = "66f24e49dafd974b9fe6463627c0a25bb8b1e1f59bcbd6acd1ba006cd5c0e072"
