@@ -12,6 +12,7 @@ def get_data_from_xlsx(file_path: str) -> pd.DataFrame:
 
 
 def date_formater(date: str) -> datetime:
+    """ Функция для форматирования даты """
     try:
         date_format = datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y.%m.%d")
         date = datetime.strptime(date_format, "%Y.%m.%d")
@@ -21,6 +22,7 @@ def date_formater(date: str) -> datetime:
 
 
 def open_json(file_path: Any) -> Any:
+    """ Функция для чтения файлов JSON"""
     with open(file_path, "r", encoding="utf-8") as f:
         try:
             result = json.load(f)

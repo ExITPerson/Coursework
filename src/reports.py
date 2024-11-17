@@ -99,7 +99,7 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
 def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """
-    Функция формирующая отчет по средней сумме операций по дням недели
+    Функция формирующая отчет по средней сумме операций по выходным и будним дням
     за 3 месяца от заданной даты
     """
     weekdays_expenses: list = [{"Weekday": [], "Days_off": []}]

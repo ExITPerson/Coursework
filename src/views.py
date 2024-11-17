@@ -27,6 +27,7 @@ API_KEY_STOCK = os.getenv("API_KEY_STOCK")
 
 
 def greeting() -> str:
+    """ Функция приветствия """
     logger.info("Получаем часы")
     time = datetime.now().hour
 
@@ -42,6 +43,7 @@ def greeting() -> str:
 
 
 def info_on_the_card(data: pd.DataFrame, date: datetime) -> list:
+    """ Функция для формирования отчета по номерам карт о расходах и возможном получении кэшбэка """
     logger.info("Получаем дату начала месяца")
     date_to = date.replace(day=1)
     try:
@@ -78,6 +80,7 @@ def info_on_the_card(data: pd.DataFrame, date: datetime) -> list:
 
 
 def get_top_five_transactions(data: pd.DataFrame, date: datetime) -> list:
+    """ Функция для формирования отчета о топ 5 транзакций по их сумме """
     logger.info("Получаем дату начала месяца")
     date_to = date.replace(day=1)
     logger.info("Переводим данный в формат списка словарей")
@@ -114,6 +117,7 @@ def get_top_five_transactions(data: pd.DataFrame, date: datetime) -> list:
 
 
 def exchange_rate() -> list:
+    """ Функция для отображения курса валют для пользователя """
     logger.info("Открываем пользовательские настройки")
     currency_user = open_json("user_settings.json")
 
@@ -139,6 +143,7 @@ def exchange_rate() -> list:
 
 
 def stock_quotes() -> list:
+    """ Функция для отображения стоимости акций по их тикерам """
     logger.info("Открываем пользовательские настройки")
     stocks = open_json("user_settings.json")
 
@@ -160,6 +165,10 @@ def stock_quotes() -> list:
 
 
 def get_the_end_result(date_user: str, data: pd.DataFrame) -> Any:
+    """
+    Главная функция (Главного меню), которая собирает всю информацию с отдельных функций
+    и отображает ее в виде JSON-ответа для отображения пользователю
+    """
     logger.info("Получаем данные из функций для формирования JSON-ответа")
     date = date_formater(date_user).date()
     greet = greeting()
