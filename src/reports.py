@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timedelta
 from statistics import mean
@@ -13,7 +14,7 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
+def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd:
     """
     Функция формирующая отчет по операциям, фильтруя по категориям, за 3 месяца
     """
@@ -48,11 +49,10 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         raise ValueError("Не верный формат данных")
 
     logger.info("Преобразование списка в df")
-    df = pd.DataFrame(filtered_transactions)
-    return df
+    return json.dumps(filtered_transactions, ensure_ascii=False, indent=4)
 
 
-def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
+def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd:
     """
     Функция формирующая отчет по средней сумме операций по дням недели
     за 3 месяца от заданной даты
@@ -93,11 +93,10 @@ def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     logger.info("Преобразование списка в df")
     avg_daily_expenses = [{k: round(-mean(v), 2) if len(v) != 0 else 0 for k, v in day_list[0].items()}]
-    df = pd.DataFrame(avg_daily_expenses)
-    return df
+    return json.dumps(avg_daily_expenses, ensure_ascii=False, indent=4)
 
 
-def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
+def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd:
     """
     Функция формирующая отчет по средней сумме операций по выходным и будним дням
     за 3 месяца от заданной даты
@@ -121,5 +120,4 @@ def spending_by_workday(transactions: pd.DataFrame, date: Optional[str] = None) 
 
     logger.info("Преобразование списка в df")
     avg_weekdays_expenses = [{k: round(mean(v), 2) if len(v) != 0 else 0 for k, v in weekdays_expenses[0].items()}]
-    df = pd.DataFrame(avg_weekdays_expenses)
-    return df
+    return json.dumps(avg_weekdays_expenses, ensure_ascii=False, indent=4)
